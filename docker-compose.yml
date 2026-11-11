@@ -1,8 +1,11 @@
 services:
   app:
     build: ./backend
+    environment:
+      COMPOSER_PROCESS_TIMEOUT: 0
     volumes:
       - ./backend:/var/www/html
+      - .vendor:/var/www/html/vendor
   web:
     image: nginx:alpine
     ports: ["8000:80"]
