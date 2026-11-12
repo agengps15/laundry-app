@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('order_status_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id');
-            $table->string('from_status')->constrained()->cascadeOnDelete();
-            $table->string('to_status')->nullable();
-            $table->foreignId('changed_by')->nullable()->constrained('users');
-            $table->timestamp('created_at')->useCurrent();
+             $table->id();
+             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+             $table->string('from_status')->nullable();
+             $table->string('to_status');
+             $table->foreignId('changed_by')->nullable()->constrained('users');
+             $table->timestamp('created_at')->useCurrent();
         });
+
     }
 
     /**
