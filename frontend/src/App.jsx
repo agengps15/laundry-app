@@ -1,17 +1,36 @@
 import { Link, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth'
+import ProtectedRoute from './ProtectedRoute'
+import CreateOrder from './pages/CreateOrder'
 import Login from './pages/Login'
+import MyOrders from './pages/MyOrders'
 import Services from './pages/Services'
+import Track from './pages/Track'
 
 function Navbar() {
   const { user, logout } = useAuth()
 
   return (
     <header className="border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex max-w-5xl items-center justify-between p-4">
-        <Link to="/" className="text-lg font-bold text-sky-700">
-          Laundry App
-        </Link>
+      <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-lg font-bold text-sky-700">
+            Laundry App
+          </Link>
+          <Link to="/track" className="text-sm text-slate-600 hover:text-sky-700">
+            Lacak
+          </Link>
+          {user && (
+            <>
+              <Link to="/orders" className="text-sm text-slate-600 hover:text-sky-700">
+                Pesanan Saya
+              </Link>
+              <Link to="/orders/new" className="text-sm text-slate-600 hover:text-sky-700">
+                Buat Order
+              </Link>
+            </>
+          )}
+        </div>
         <div className="flex items-center gap-4 text-sm">
           {user ? (
             <>
@@ -24,10 +43,7 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <Link
-              to="/login"
-              className="rounded-md bg-sky-600 px-3 py-1 text-white hover:bg-sky-700"
-            >
+            <Link to="/login" className="rounded-md bg-sky-600 px-3 py-1 text-white hover:bg-sky-700">
               Masuk
             </Link>
           )}
@@ -45,6 +61,24 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Services />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/track" element={<Track />} />
+          <Route path="/track/:code" element={<Track />} />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <MyOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders/new"
+            element={
+              <ProtectedRoute>
+                <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>
