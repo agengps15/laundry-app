@@ -17,10 +17,15 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Order::with('items.service')->latest();
+        $query = Order::with('items.service', 'customer:id,name,phone')->latest();
 
         if ($user->role === 'customer') {
             $query->where('customer_id', $user->id);
+        }
+
+        if ($request->filled('status') && OrderStatus::tryfrom($request->query('status'))){ 
+            $query->where('status', $request->query('status'));
+
         }
 
         return $query->paginate(10);

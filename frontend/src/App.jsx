@@ -5,10 +5,12 @@ import CreateOrder from './pages/CreateOrder'
 import Login from './pages/Login'
 import MyOrders from './pages/MyOrders'
 import Services from './pages/Services'
+import StaffOrders from './pages/StaffOrders'
 import Track from './pages/Track'
 
 function Navbar() {
   const { user, logout } = useAuth()
+  const isStaff = ['admin', 'cashier'].includes(user?.role)
 
   return (
     <header className="border-b border-slate-200 bg-white">
@@ -29,6 +31,11 @@ function Navbar() {
                 Buat Order
               </Link>
             </>
+          )}
+          {isStaff && (
+            <Link to="/staff/orders" className="text-sm text-slate-600 hover:text-sky-700">
+              Dashboard
+            </Link>
           )}
         </div>
         <div className="flex items-center gap-4 text-sm">
@@ -76,6 +83,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CreateOrder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/orders"
+            element={
+              <ProtectedRoute roles={['admin', 'cashier']}>
+                <StaffOrders />
               </ProtectedRoute>
             }
           />

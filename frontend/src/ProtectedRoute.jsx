@@ -1,7 +1,11 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from './auth'
 
-export default function ProtectedRoute({ children }) {
-  const { token } = useAuth()
-  return token ? children : <Navigate to="/login" replace />
+export default function ProtectedRoute({ children, roles }) {
+  const { token, user } = useAuth()
+
+  if (!token) return <Navigate to="/login" replace />
+  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />
+
+  return children
 }
