@@ -36,6 +36,11 @@ class ServiceController extends Controller
         return response()->noContent();
     }
 
+    public function adminIndex()
+    {
+        return Service::orderBy('name')->get();
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([

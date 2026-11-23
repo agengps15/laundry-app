@@ -3,6 +3,7 @@ import { useAuth } from './auth'
 import ProtectedRoute from './ProtectedRoute'
 import CreateOrder from './pages/CreateOrder'
 import Login from './pages/Login'
+import ManageServices from './pages/ManageServices'
 import MyOrders from './pages/MyOrders'
 import Services from './pages/Services'
 import StaffOrders from './pages/StaffOrders'
@@ -11,11 +12,12 @@ import Track from './pages/Track'
 function Navbar() {
   const { user, logout } = useAuth()
   const isStaff = ['admin', 'cashier'].includes(user?.role)
+  const isAdmin = user?.role === 'admin'
 
   return (
     <header className="border-b border-slate-200 bg-white">
       <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <Link to="/" className="text-lg font-bold text-sky-700">
             Laundry App
           </Link>
@@ -35,6 +37,11 @@ function Navbar() {
           {isStaff && (
             <Link to="/staff/orders" className="text-sm text-slate-600 hover:text-sky-700">
               Dashboard
+            </Link>
+          )}
+          {isAdmin && (
+            <Link to="/admin/services" className="text-sm text-slate-600 hover:text-sky-700">
+              Kelola Layanan
             </Link>
           )}
         </div>
@@ -91,6 +98,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={['admin', 'cashier']}>
                 <StaffOrders />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/services"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <ManageServices />
               </ProtectedRoute>
             }
           />

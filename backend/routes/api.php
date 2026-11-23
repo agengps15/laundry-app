@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/services', [ServiceController::class, 'adminIndex']);
         Route::post('/services', [ServiceController::class, 'store']);
         Route::put('/services/{service}', [ServiceController::class, 'update']);
         Route::delete('/services/{service}', [ServiceController::class, 'destroy']);
