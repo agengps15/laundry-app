@@ -15,7 +15,7 @@ class OrderTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function userWithRole(string $role, string $email = null): User
+    private function userWithRole(string $role, ?string $email = null): User
     {
         return User::create([
             'name' => ucfirst($role),
@@ -127,6 +127,19 @@ class OrderTest extends TestCase
         $this->patchJson("/api/orders/{$order->id}/advance")->assertForbidden();
     }
 
+    public function test_staff_can_filter_orders_by_status(): void
+    {
+        $customer = $this->userWithRole('customer');
+        $this->orderFor($customer, OrderStatus::Received);
+        $this->orderFor($customer, OrderStatus::Washing);
+        Sanctum::actingAs($this->userWithRole('cashier'));
+
+        $this->getJson('/api/orders?status=washing')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.status', 'washing');
+    }
+
     public function test_public_tracking_hides_personal_data(): void
     {
         $order = $this->orderFor($this->userWithRole('customer'));
@@ -136,5 +149,10 @@ class OrderTest extends TestCase
             ->assertJsonPath('status_label', 'Diterima')
             ->assertJsonMissingPath('customer_id')
             ->assertJsonMissingPath('total_price');
+    }
+
+    public function test_unknown_tracking_code_returns_404(): void
+    {
+        $this->getJson('/api/track/SALAH-123')->assertNotFound();
     }
 }

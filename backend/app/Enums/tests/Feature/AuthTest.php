@@ -13,15 +13,16 @@ class AuthTest extends TestCase
 
     public function test_user_can_register_as_customer(): void
     {
-        $response = $this->postJson('/api/register', [
+        $this->postJson('/api/register', [
             'name' => 'Siti',
             'email' => 'siti@example.com',
             'phone' => '08987654321',
             'password' => 'password123',
             'password_confirmation' => 'password123',
-        ]);
+        ])
+            ->assertCreated()
+            ->assertJsonPath('user.role', 'customer');
 
-        $response->assertCreated()->assertJsonPath('user.role', 'customer');
         $this->assertDatabaseHas('users', ['email' => 'siti@example.com', 'phone' => '08987654321']);
     }
 
@@ -50,6 +51,20 @@ class AuthTest extends TestCase
             'email' => 'budi@example.com',
             'password' => 'password123',
         ])->assertOk()->assertJsonStructure(['token']);
+    }
+
+    public function test_login_fails_with_wrong_password(): void
+    {
+        User::create([
+            'name' => 'Budi',
+            'email' => 'budi@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->postJson('/api/login', [
+            'email' => 'budi@example.com',
+            'password' => 'salah',
+        ])->assertUnprocessable();
     }
 
     public function test_me_requires_token(): void

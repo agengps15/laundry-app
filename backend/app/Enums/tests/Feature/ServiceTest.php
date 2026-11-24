@@ -53,6 +53,22 @@ class ServiceTest extends TestCase
         $this->postJson('/api/services', $this->payload)->assertForbidden();
     }
 
+    public function test_cashier_cannot_open_admin_service_list(): void
+    {
+        Sanctum::actingAs($this->userWithRole('cashier'));
+
+        $this->getJson('/api/admin/services')->assertForbidden();
+    }
+
+    public function test_admin_can_list_inactive_services_too(): void
+    {
+        Sanctum::actingAs($this->userWithRole('admin'));
+        Service::create($this->payload + ['is_active' => true]);
+        Service::create(['name' => 'Lama', 'pricing_type' => 'per_kg', 'price' => 1000, 'estimated_hours' => 24, 'is_active' => false]);
+
+        $this->getJson('/api/admin/services')->assertOk()->assertJsonCount(2);
+    }
+
     public function test_admin_can_create_service(): void
     {
         Sanctum::actingAs($this->userWithRole('admin'));
