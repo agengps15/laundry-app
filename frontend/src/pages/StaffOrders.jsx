@@ -15,35 +15,36 @@ export default function StaffOrders() {
   const { token } = useAuth()
   const [status, setStatus] = useState('')
   const [page, setPage] = useState(1)
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [busyId, setBusyId] = useState(null)
   const [reload, setReload] = useState(0)
+  const [busyId, setBusyId] = useState(null)
+  const [actionError, setActionError] = useState('')
+  const [loaded, setLoaded] = useState({ key: null, data: null, error: '' })
+
+  const requestKey = `${status}|${page}|${reload}`
 
   useEffect(() => {
     let ignore = false
-    setLoading(true)
-    setError('')
 
     const query = new URLSearchParams({ page })
     if (status) query.set('status', status)
 
     api(`/orders?${query}`, { token })
       .then((data) => {
-        if (!ignore) setResult(data)
+        if (!ignore) setLoaded({ key: requestKey, data, error: '' })
       })
       .catch((err) => {
-        if (!ignore) setError(err.message)
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false)
+        if (!ignore) setLoaded({ key: requestKey, data: null, error: err.message })
       })
 
     return () => {
       ignore = true
     }
-  }, [token, status, page, reload])
+  }, [token, status, page, requestKey])
+
+  const loading = loaded.key !== requestKey
+  const result = loaded.data
+  const error = actionError || (loading ? '' : loaded.error)
+  const orders = result?.data ?? []
 
   function changeFilter(value) {
     setStatus(value)
@@ -62,18 +63,16 @@ export default function StaffOrders() {
     }
 
     setBusyId(order.id)
-    setError('')
+    setActionError('')
     try {
       await api(`/orders/${order.id}/advance`, { method: 'PATCH', token })
       setReload((n) => n + 1)
     } catch (err) {
-      setError(err.errors?.status?.[0] ?? err.message)
+      setActionError(err.errors?.status?.[0] ?? err.message)
     } finally {
       setBusyId(null)
     }
   }
-
-  const orders = result?.data ?? []
 
   return (
     <section>

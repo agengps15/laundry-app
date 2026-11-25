@@ -8,35 +8,33 @@ export default function Track() {
   const { code } = useParams()
   const navigate = useNavigate()
   const [input, setInput] = useState(code ?? '')
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loaded, setLoaded] = useState({ code: null, data: null, error: '' })
 
   useEffect(() => {
     if (!code) return
     let ignore = false
-    setLoading(true)
-    setError('')
-    setData(null)
 
     api(`/track/${encodeURIComponent(code)}`)
       .then((d) => {
-        if (!ignore) setData(d)
+        if (!ignore) setLoaded({ code, data: d, error: '' })
       })
       .catch((err) => {
         if (ignore) return
-        if (err.status === 404) setError('Kode order tidak ditemukan. Periksa kembali kodenya.')
-        else if (err.status === 429) setError('Terlalu banyak permintaan. Coba lagi sebentar lagi.')
-        else setError(err.message)
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false)
+        let message = err.message
+        if (err.status === 404) message = 'Kode order tidak ditemukan. Periksa kembali kodenya.'
+        else if (err.status === 429) message = 'Terlalu banyak permintaan. Coba lagi sebentar lagi.'
+        setLoaded({ code, data: null, error: message })
       })
 
     return () => {
       ignore = true
     }
   }, [code])
+
+  const current = loaded.code === code ? loaded : null
+  const loading = Boolean(code) && !current
+  const data = current?.data ?? null
+  const error = current?.error ?? ''
 
   function handleSubmit(e) {
     e.preventDefault()
